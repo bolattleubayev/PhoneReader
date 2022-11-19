@@ -1,10 +1,15 @@
 # import the opencv library
 import cv2
 import numpy as np
+import requests
+import time
+import datetime  
+
 
 # define a video capture object
 vid = cv2.VideoCapture(1)
 
+# Load the kNN model
 samples = np.loadtxt('generalsamples.data',np.float32)
 responses = np.loadtxt('generalresponses.data',np.float32)
 responses = responses.reshape((responses.size,1))
@@ -12,32 +17,43 @@ responses = responses.reshape((responses.size,1))
 model = cv2.ml.KNearest_create()
 model.train(samples,cv2.ml.ROW_SAMPLE,responses)
 
-while(True):
-    
-    # Capture the video frame
-    # by frame
-    ret, frame = vid.read()
-    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    # thresh = cv2.adaptiveThreshold(gray,255,1,1,11,2)
-    thresh2 = cv2.threshold(gray,127,255,cv2.THRESH_BINARY_INV)
-    thresh = cv2.morphologyEx(thresh2[1], cv2.MORPH_OPEN, (5,5))
+# Constants
+kernel = np.ones((5,5),np.uint8)
+url = 'https://YOURAPI.herokuapp.com/api/v1/entries'
+api_secret = "API-SECRET"
+minutes_between_regular_updates = 5
+isDebugMode = False #
 
+while(True):
+    ret, frame = vid.read()
+
+    # Clean image for recognition
+    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    thresh2 = cv2.threshold(gray,127,255,cv2.THRESH_BINARY_INV)
+    # thresh = cv2.morphologyEx(thresh2[1], cv2.MORPH_OPEN, (5,5))
+    
+    thresh = cv2.erode(thresh2[1],kernel,iterations = 1)
+    thresh = cv2.dilate(thresh,kernel,iterations = 1)
+
+    # Extract contours
     _,contours,_ = cv2.findContours(thresh,cv2.RETR_LIST,cv2.CHAIN_APPROX_SIMPLE)
     
     number_location_pairs = []
 
     for cnt in contours:
-        [x,y,w,h] = cv2.boundingRect(cnt)
-        if  h > 70 and w > 70:
-            cv2.rectangle(frame,(x,y),(x+w,y+h),(0,255,0),2)
-            roi = thresh[y:y+h,x:x+w]
-            roismall = cv2.resize(roi,(10,10))
-            roismall = roismall.reshape((1,100))
-            roismall = np.float32(roismall)
-            retval, results, neigh_resp, dists = model.findNearest(roismall, k = 1)
-            string = str(int((results[0][0])))
-            cv2.putText(frame,string,(x,y+h),0,1,(0,255,0))
-            number_location_pairs.append([string, x])
+        if cv2.contourArea(cnt)>150:
+            [x,y,w,h] = cv2.boundingRect(cnt)
+            if  h > 140 and w > 100:
+                roi = thresh[y:y+h,x:x+w]
+                roismall = cv2.resize(roi,(10,10))
+                roismall = roismall.reshape((1,100))
+                roismall = np.float32(roismall)
+                retval, results, neigh_resp, dists = model.findNearest(roismall, k = 1)
+                string = str(int((results[0][0])))
+                if isDebugMode:
+                    cv2.rectangle(frame,(x,y),(x+w,y+h),(0,255,0),2)
+                    cv2.putText(frame,string,(x,y+h),0,1,(0,255,0))
+                number_location_pairs.append([string, x])
 
     # Form a reading
     valNum = len(number_location_pairs)
@@ -48,17 +64,48 @@ while(True):
         if i == valNum - 1:
             num += '.'
         num += number_location_pairs[i][0]
-    print(num)
-    # Display the resulting frame
     
-    cv2.imshow('frame', thresh)
-    # the 'q' button is as the
-    # quitting button you may use any
-    # desired button of your choice
-    if cv2.waitKey(1) & 0xFF == ord('q'):
-        break
+    # If there is no reading update every minute
+    # Else, update once in 5 minutes
+    if num != "" and not isDebugMode:
+        number = int(float(num) * 18)
+        dateStr = str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z"))
+        timestamp = round(time.time() * 1000)
+        
+        data = [{
+            "type": "sgv",
+            "dateString": f"{dateStr}",
+            "date": timestamp,
+            "sgv": number,
+            "direction": "Flat",
+            "noise": 0,
+            "filtered": 0,
+            "unfiltered": 0,
+            "rssi": 0
+        }]
+        headers = {
+            "Content-Type": "application/json",
+            "api-secret": api_secret
+        
+        }
 
-# After the loop release the cap object
+        x = requests.post(url, json = data, headers=headers)
+        time.sleep(minutes_between_regular_updates*60)
+    else:
+        time.sleep(60)
+        continue
+
+    # Display the frame if in debug
+    if isDebugMode:
+        print(num)
+        cv2.imshow('frame', thresh)
+        # Press 'q' button to quit
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
+
+    
+
+# Release the cap object
 vid.release()
 # Destroy all the windows
 cv2.destroyAllWindows()
