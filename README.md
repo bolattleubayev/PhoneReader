@@ -14,7 +14,7 @@ The project consists of several important parts:
  * a 5V, 1A charger for Beaglebone (5.5mm OD, 2.1mm ID, center positive)
  * a phone charger
 
-<img src = "/setup01.jpg" width ="200" /> <img src = "/setup02.jpg" width ="200" />
+<img src = "/setup01.jpg" width ="500" /> <img src = "/setup02.jpg" width ="500" />
 
  ### Software
  **Digit recognition training**
