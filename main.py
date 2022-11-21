@@ -21,7 +21,7 @@ model.train(samples,cv2.ml.ROW_SAMPLE,responses)
 # Constants
 kernel = np.ones((5,5),np.uint8)
 url = 'https://YOUR-API.herokuapp.com/api/v1/entries'
-api_secret = "YOUR-SHA1-SECRET"
+api_secret = "YOUR-SHA-1-ENCODED-SECRET"
 minutes_between_regular_updates = 5
 
 if not vid.isOpened():
