@@ -34,7 +34,10 @@ Assuming that you have a Beaglebone that runs on Linux on the latest available i
 ```
 sudo scp /Users/BigMac/Desktop/filename debian@192.168.7.2:/home/debian/
 ```
-
+* Install *requests* package with *pip* for API communication
+```
+pip install requests
+```
 * Try running the script and test its performance
 * Schedule the script run for evey 5 minutes (or any other frequence of your choice) using *crontab*
 ```
