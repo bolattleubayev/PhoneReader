@@ -14,6 +14,10 @@ The project consists of several important parts:
  * a 5V, 1A charger for Beaglebone (5.5mm OD, 2.1mm ID, center positive)
  * a phone charger
 
+ ![Setup side view](/setup01.jpg)
+
+ ![Setup top view](/setup02.jpg)
+
  ### Software
  **Digit recognition training**
  If you are using LibreLinkUp then you can use available *generalresponses.data* and *generalsamples.data* files. The k-Nearest Neighbor algorithm was trained on Source Sans 3 font (implementation taken from https://stackoverflow.com/questions/9413216/simple-digit-recognition-ocr-in-opencv-python).
