@@ -39,7 +39,7 @@ gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 binary_inverse = cv2.threshold(gray,80,255,cv2.THRESH_BINARY_INV)
 
 thresh = binary_inverse[1]
-thresh = cv2.erode(binary_inverse[1],kernel,iterations = 1) 
+thresh = cv2.erode(binary_inverse[1],kernel,iterations = 1)
 thresh = cv2.dilate(thresh,kernel,iterations = 1)
 
 # Extract contours
@@ -74,8 +74,7 @@ for i in range(valNum):
 if num == '.10':
     # print("LOW")
     pass
-elif len(number_location_pairs) < 2:
-    # print("No data")
+elif valNum < 2:
     pass
 elif float(num) > 30:
     # print("Too high, invalid data")
@@ -91,27 +90,23 @@ else:
     
     data = [{
         "type": "sgv",
-        "dateString": f"{dateStr}",
+        "dateString": dateStr,
         "date": timestamp,
         "sgv": number,
         "direction": "Flat",
         "noise": 0,
         "filtered": 0,
-        "unfiltered": f"{num}",
+        "unfiltered": float(num),
         "rssi": 0
     }]
     headers = {
         "Content-Type": "application/json",
         "api-secret": api_secret
-    
     }
     try:
         x = requests.post(url, json = data, headers=headers)
-        time.sleep(minutes_between_regular_updates * 60)
-    except:
-        print("API connection error")
-
-    # cv2.imwrite('test.png',thresh)
+    except Exception as e:
+        print("API connection error: " + str(e))
 
 # When everything done, release the capture
 vid.release()

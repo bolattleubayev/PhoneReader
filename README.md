@@ -35,9 +35,14 @@ Assuming that you have a Beaglebone that runs on Linux on the latest available i
 * You will first need to install OpenCV and its dependencies through apt-get.
 * Then you will need to put *main.py*, *generalresponses.data*, and *generalsamples.data* files to the Beaglebone with *scp*. In my case it was in */home/debian/*.
 
+
+In a computer terminal (not BBB debian) you can use the following to upload data to the BBB
 ```
 sudo scp /Users/BigMac/Desktop/filename debian@192.168.7.2:/home/debian/
 ```
+
+<img src = "/scp_example.png" width ="500" />
+
 * Install *requests* package with *pip* for API communication
 ```
 pip install requests
