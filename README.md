@@ -5,7 +5,7 @@ This project is an IoT addition to the existing LibreLinkUp application, or with
 
 ### Hardware
 
-The code is intended to use on a Linux-based computers and boards such as Raspberry Pi, Beaglebone, Orange Pi etc. In my case it was tested and deployed on Beaglebone Black, so for different hardware a little bit different tweaking might be necessary.
+The code is intended to use on a Linux-based computers and boards such as Raspberry Pi, Beaglebone Black (BBB), Orange Pi etc. In my case it was tested and deployed on Beaglebone Black, so for different hardware a little bit different tweaking might be necessary.
 
 The project consists of several important parts:
  * a LibreLinkUp enabled phone, in my case iPhone 7
@@ -15,6 +15,12 @@ The project consists of several important parts:
  * a phone charger
 
 <img src = "/setup01.jpg" width ="500" /> <img src = "/setup02.jpg" width ="500" />
+
+Connect to BBB to your computer via USB and Ethernet cable, then using terminal type:
+
+```
+ssh debian@192.168.7.2
+```
 
  ### Software
  **Digit recognition training**
