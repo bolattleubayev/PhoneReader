@@ -27,6 +27,8 @@ The project consists of several important parts:
 
 You might want to tweak sizes for filtering contours for your setup as well as morphological operations performed on the input frame. This may vary due to camera positioning, screen brightness, etc.
 
+The script can run on on Python 3.7.x/3.6.x and OpenCV 3.x
+
  ### Beaglebone setup
 Assuming that you have a Beaglebone that runs on Linux on the latest available image. It is preferable to use the latest image as it already runs on Python 3.6 and removes the need of installing it manually.
 

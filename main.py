@@ -36,11 +36,11 @@ if not ret:
 
 # Clean image for recognition
 gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-thresh2 = cv2.threshold(gray,80,255,cv2.THRESH_BINARY_INV)
-# thresh = cv2.morphologyEx(thresh2[1], cv2.MORPH_OPEN, (5,5))
-thresh = thresh2[1]
-#thresh = cv2.erode(thresh2[1],kernel,iterations = 1)
-#thresh = cv2.dilate(thresh,kernel,iterations = 1)
+binary_inverse = cv2.threshold(gray,80,255,cv2.THRESH_BINARY_INV)
+
+thresh = binary_inverse[1]
+thresh = cv2.erode(binary_inverse[1],kernel,iterations = 1) 
+thresh = cv2.dilate(thresh,kernel,iterations = 1)
 
 # Extract contours
 _,contours,_ = cv2.findContours(thresh,cv2.RETR_LIST,cv2.CHAIN_APPROX_SIMPLE)
@@ -48,9 +48,11 @@ _,contours,_ = cv2.findContours(thresh,cv2.RETR_LIST,cv2.CHAIN_APPROX_SIMPLE)
 number_location_pairs = []
 
 for cnt in contours:
-    if cv2.contourArea(cnt)>150:
+    if cv2.contourArea(cnt) > 2000:
         [x,y,w,h] = cv2.boundingRect(cnt)
-        if  h > 100 and w > 60 and y < 340 and y > 60:
+        if x > 120 and x < 560 \
+                    and y > 100 and y < 340 \
+                    and x+w < 560 and y+h < 340:
             roi = thresh[y:y+h,x:x+w]
             roismall = cv2.resize(roi,(15,15))
             roismall = roismall.reshape((1,225))
@@ -69,12 +71,20 @@ for i in range(valNum):
         num += '.'
     num += number_location_pairs[i][0]
 
-print(num)
-cv2.imwrite('test.png',thresh)
-
-# If there is no reading update every minute
-# Else, update once in 5 minutes
-if num != "":
+if num == '.10':
+    # print("LOW")
+    pass
+elif len(number_location_pairs) < 2:
+    # print("No data")
+    pass
+elif float(num) > 30:
+    # print("Too high, invalid data")
+    pass
+elif float(num) < 2:
+    # print("Too low, invalid data")
+    pass
+else:
+    # print(num)
     number = int(float(num) * 18)
     dateStr = str(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z"))
     timestamp = round(time.time() * 1000)
@@ -100,10 +110,8 @@ if num != "":
         time.sleep(minutes_between_regular_updates * 60)
     except:
         print("API connection error")
-        time.sleep(60)
-    
-else:
-    time.sleep(60)
+
+    # cv2.imwrite('test.png',thresh)
 
 # When everything done, release the capture
 vid.release()
